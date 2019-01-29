@@ -9,7 +9,7 @@ namespace Sender
         {
             using (var channel = new PointToPointChannel("hello-p2p"))
             {
-                string message = "Hello World!";
+                string message = "Hello World! Please, send to someone to consume that!";
                 channel.Send(message);
                 Console.WriteLine("Sent message {0}", message);
             }

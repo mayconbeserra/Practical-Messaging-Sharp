@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 
 namespace SimpleMessaging
 {
-    public class DataTypeChannelProducer<T> : IDisposable where T: IAmAMessage 
+    public class DataTypeChannelProducer<T> : IDisposable where T : IAmAMessage
     {
         private readonly Func<T, string> _messageSerializer;
         private readonly string _routingKey;
@@ -38,34 +38,34 @@ namespace SimpleMessaging
             factory.AutomaticRecoveryEnabled = true;
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            
-             /* We choose to base the key off the type name, because we want tp publish to folks interested in this type
-              We name the queue after that routing key as we are point-to-point and only expect one queue to receive
-             this type of message */
+
+            /* We choose to base the key off the type name, because we want tp publish to folks interested in this type
+             We name the queue after that routing key as we are point-to-point and only expect one queue to receive
+            this type of message */
             _routingKey = "Polling-Consumer." + typeof(T).FullName;
             var queueName = _routingKey;
 
             var invalidRoutingKey = "invalid." + _routingKey;
             var invalidMessageQueueName = invalidRoutingKey;
-            
+
             _channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct, durable: true);
             var arguments = new Dictionary<string, object>()
             {
                 {"x-dead-letter-exchange", InvalidMessageExchangeName},
                 {"x-dead-letter-routing-key", invalidRoutingKey}
             };
-            
+
             //if we are going to have persistent messages, it mostly makes sense to have a durable queue, to survive
             //restarts, or client failures
-             _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
-            _channel.QueueBind(queue:queueName, exchange: ExchangeName, routingKey: _routingKey);
-            
+            _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
+            _channel.QueueBind(queue: queueName, exchange: ExchangeName, routingKey: _routingKey);
+
             //declare a queue for invalid messages off an invalid message exchange
             //messages that we nack without requeue will go here
-           _channel.ExchangeDeclare(InvalidMessageExchangeName, ExchangeType.Direct, durable: true);
+            _channel.ExchangeDeclare(InvalidMessageExchangeName, ExchangeType.Direct, durable: true);
             _channel.QueueDeclare(queue: invalidMessageQueueName, durable: true, exclusive: false, autoDelete: false);
-            _channel.QueueBind(queue:invalidMessageQueueName, exchange:InvalidMessageExchangeName, routingKey:invalidRoutingKey);
-    }
+            _channel.QueueBind(queue: invalidMessageQueueName, exchange: InvalidMessageExchangeName, routingKey: invalidRoutingKey);
+        }
 
         /// <summary>
         /// Send a message over the channel

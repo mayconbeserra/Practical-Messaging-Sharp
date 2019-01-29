@@ -32,6 +32,25 @@ namespace SimpleMessaging
              *     dispose of the channel
              *  return the task
              */
+             var task = Task.Factory.StartNew(() => 
+             {
+                 ct.ThrowIfCancellationRequested();
+
+                 using (var channnel = new DataTypeChannelConsumer<T>(_messageSerializer, _hostName))
+                 {
+                     while (true)
+                     {
+                         var message = channnel.Receive();
+                         _messageHandler.Handle(message);
+
+                         Task.Delay(1000, ct).Wait(ct);
+
+                         ct.ThrowIfCancellationRequested();
+                     }
+                 }
+             });
+
+             return task;
         }
     }
 }

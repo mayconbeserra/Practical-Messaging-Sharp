@@ -11,7 +11,7 @@ namespace Sender
     {
         static void Main(string[] args)
         {
-            var consumer = new Filter<Greeting, EnrichedGreeting>(
+              var consumer = new Filter<Greeting, EnrichedGreeting>(
                     new GreetingEnricher(), 
                     messageBody => JsonConvert.DeserializeObject<Greeting>(messageBody),
                     (enrichedGreeting) => JsonConvert.SerializeObject(enrichedGreeting)
@@ -55,7 +55,6 @@ namespace Sender
             {
                 tokenSource.Dispose();
             }
-
         }
     }
 }
